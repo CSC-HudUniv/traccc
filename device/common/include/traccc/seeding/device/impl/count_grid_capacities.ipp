@@ -41,8 +41,8 @@ void count_grid_capacities(
     if (is_valid_sp(config, sp) != detray::invalid_value<size_t>()) {
 
         // Find the grid bin that the spacepoint belongs to.
-        const internal_spacepoint<spacepoint> isp(spacepoints, sp_idx,
-                                                  config.beamPos);
+        const internal_spacepoint<spacepoint> isp(
+            spacepoints, {sp_idx.first, sp_idx.second}, config.beamPos);
         const std::size_t bin_index =
             phi_axis.bin(isp.phi()) + phi_axis.bins() * z_axis.bin(isp.z());
 
