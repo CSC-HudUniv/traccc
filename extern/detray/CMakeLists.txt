@@ -8,6 +8,11 @@
 cmake_minimum_required( VERSION 3.14 )
 include( FetchContent )
 
+# Silence FetchContent warnings with CMake >=3.24.
+if( POLICY CMP0135 )
+   cmake_policy( SET CMP0135 NEW )
+endif()
+
 # Tell the user what's happening.
 message( STATUS "Building Detray as part of the TRACCC project" )
 
@@ -16,8 +21,9 @@ message( STATUS "Building Detray as part of the TRACCC project" )
 #   "URL;https://github.com/acts-project/detray/archive/refs/tags/v0.8.0.tar.gz;URL_MD5;17bc6260be77ffb8d69fd1fd06a4c22f"
 #   CACHE STRING "Source for Detray, when built as part of this project" )
 set( TRACCC_DETRAY_SOURCE
-   "GIT_REPOSITORY;https://github.com/acts-project/detray.git;GIT_TAG;v0.10.0"
+   "URL;https://github.com/acts-project/detray/archive/refs/tags/v0.12.0.tar.gz;URL_MD5;77dae6fc8fa80edc2514cb26cad759a6"
    CACHE STRING "Source for Detray, when built as part of this project" )
+
 mark_as_advanced( TRACCC_DETRAY_SOURCE )
 FetchContent_Declare( Detray ${TRACCC_DETRAY_SOURCE} )
 

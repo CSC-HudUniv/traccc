@@ -8,21 +8,14 @@
 #pragma once
 
 // traccc include
-#include "traccc/edm/spacepoint.hpp"
+#include "traccc/definitions/primitives.hpp"
+#include "traccc/edm/container.hpp"
 
 // detray core
 #include <detray/utils/invalid_values.hpp>
 
-// VecMem include(s).
-#include <vecmem/containers/data/jagged_vector_buffer.hpp>
-#include <vecmem/containers/data/vector_buffer.hpp>
-#include <vecmem/containers/device_vector.hpp>
-#include <vecmem/containers/jagged_device_vector.hpp>
-#include <vecmem/containers/jagged_vector.hpp>
-#include <vecmem/containers/vector.hpp>
-
-// std
-#include <algorithm>
+// Algebra plugins include(s).
+#include <algebra/math/common.hpp>
 
 namespace traccc {
 
@@ -40,6 +33,7 @@ struct internal_spacepoint {
     scalar m_y;
     scalar m_z;
     scalar m_r;
+    scalar m_phi;
 
     internal_spacepoint() = default;
 
@@ -52,7 +46,8 @@ struct internal_spacepoint {
         m_x = sp.global[0] - offsetXY[0];
         m_y = sp.global[1] - offsetXY[1];
         m_z = sp.global[2];
-        m_r = std::sqrt(m_x * m_x + m_y * m_y);
+        m_r = algebra::math::sqrt(m_x * m_x + m_y * m_y);
+        m_phi = algebra::math::atan2(m_y, m_x);
     }
 
     TRACCC_HOST_DEVICE
@@ -62,13 +57,14 @@ struct internal_spacepoint {
         m_y = 0;
         m_z = 0;
         m_r = 0;
+        m_phi = 0;
     }
 
     TRACCC_HOST_DEVICE
     static inline internal_spacepoint<spacepoint_t> invalid_value() {
 
-        link_type l = {detray::invalid_value<decltype(l.first)>(),
-                       detray::invalid_value<decltype(l.second)>()};
+        link_type l = {detray::detail::invalid_value<decltype(l.first)>(),
+                       detray::detail::invalid_value<decltype(l.second)>()};
 
         return internal_spacepoint<spacepoint_t>({std::move(l)});
     }
@@ -85,7 +81,7 @@ struct internal_spacepoint {
     scalar radius() const { return m_r; }
 
     TRACCC_HOST_DEVICE
-    scalar phi() const { return algebra::math::atan2(m_y, m_x); }
+    scalar phi() const { return m_phi; }
 
     TRACCC_HOST_DEVICE
     scalar varianceR() const { return 0.; }
