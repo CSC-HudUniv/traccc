@@ -9,6 +9,7 @@
 #include "traccc/clusterization/clusterization_algorithm.hpp"
 #include "traccc/clusterization/spacepoint_formation.hpp"
 #include "traccc/cuda/clusterization/clusterization_algorithm.hpp"
+#include "traccc/cuda/clusterization/clusterisation_cca_algorithm.hpp"
 #include "traccc/cuda/seeding/seeding_algorithm.hpp"
 #include "traccc/cuda/seeding/track_params_estimation.hpp"
 #include "traccc/device/container_d2h_copy_alg.hpp"
@@ -88,6 +89,7 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
     traccc::cuda::seeding_algorithm sa_cuda(mr);
     traccc::cuda::track_params_estimation tp_cuda(mr);
     traccc::cuda::clusterization_algorithm ca_cuda(mr);
+    //traccc::cuda::clusterisation_cca_algorithm ca_cuda(mr);
 
     vecmem::cuda::copy copy;
     traccc::device::container_d2h_copy_alg<traccc::spacepoint_container_types>
