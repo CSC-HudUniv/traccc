@@ -21,19 +21,6 @@ __global__ void find_clusters(
     vecmem::data::jagged_vector_view<unsigned int> sparse_ccl_indices_view,
     vecmem::data::vector_view<std::size_t> clusters_per_module_view) {
 
-    __shared__ size_t buffer[10000000000];
-    cell_container_types::const_device cells_device(cells_view);
-
-    // Get the cells for the current module
-    if (threadIdx.x == 0)
-    {
-        for(int i = 0; i < cells_view.headers.size(); i++)
-        {
-            const auto& cells = cells_device.at(i).items;
-            buffer[i] = cells.size();
-        }
-    }
-
     device::find_clusters(threadIdx.x + blockIdx.x * blockDim.x, cells_view,
                           sparse_ccl_indices_view, clusters_per_module_view);
 }
