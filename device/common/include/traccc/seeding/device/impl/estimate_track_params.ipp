@@ -16,7 +16,7 @@ namespace traccc::device {
 TRACCC_HOST_DEVICE
 inline void estimate_track_params(
     const std::size_t globalIndex,
-    const spacepoint_container_types::const_view& spacepoints_view,
+    const spacepoint_collection_types::const_view& spacepoints_view,
     const seed_collection_types::const_view& seeds_view,
     bound_track_parameters_collection_types::view params_view) {
 
@@ -26,7 +26,7 @@ inline void estimate_track_params(
         return;
     }
 
-    const spacepoint_container_types::const_device spacepoints_device(
+    const spacepoint_collection_types::const_device spacepoints_device(
         spacepoints_view);
 
     bound_track_parameters_collection_types::device params_device(params_view);

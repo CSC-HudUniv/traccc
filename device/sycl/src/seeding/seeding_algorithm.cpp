@@ -47,6 +47,10 @@ traccc::spacepoint_grid_config default_spacepoint_grid_config() {
     grid_config.zMin = config.zMin;
     grid_config.deltaRMax = config.deltaRMax;
     grid_config.cotThetaMax = config.cotThetaMax;
+    grid_config.impactMax = config.impactMax;
+    grid_config.phiMax = config.phiMax;
+    grid_config.phiMin = config.phiMin;
+    grid_config.phiBinDeflectionCoverage = config.phiBinDeflectionCoverage;
     return grid_config;
 }
 
@@ -55,14 +59,15 @@ traccc::spacepoint_grid_config default_spacepoint_grid_config() {
 namespace traccc::sycl {
 
 seeding_algorithm::seeding_algorithm(const traccc::memory_resource& mr,
+                                     vecmem::copy& copy,
                                      const queue_wrapper& queue)
     : m_spacepoint_binning(default_seedfinder_config(),
-                           default_spacepoint_grid_config(), mr, queue),
-      m_seed_finding(default_seedfinder_config(), seedfilter_config(), mr,
+                           default_spacepoint_grid_config(), mr, copy, queue),
+      m_seed_finding(default_seedfinder_config(), seedfilter_config(), mr, copy,
                      queue) {}
 
-seed_collection_types::buffer seeding_algorithm::operator()(
-    const spacepoint_container_types::const_view& spacepoints_view) const {
+seeding_algorithm::output_type seeding_algorithm::operator()(
+    const spacepoint_collection_types::const_view& spacepoints_view) const {
 
     return m_seed_finding(spacepoints_view,
                           m_spacepoint_binning(spacepoints_view));

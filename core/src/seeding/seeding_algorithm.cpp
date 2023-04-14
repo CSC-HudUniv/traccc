@@ -46,6 +46,10 @@ traccc::spacepoint_grid_config default_spacepoint_grid_config() {
     grid_config.zMin = config.zMin;
     grid_config.deltaRMax = config.deltaRMax;
     grid_config.cotThetaMax = config.cotThetaMax;
+    grid_config.impactMax = config.impactMax;
+    grid_config.phiMax = config.phiMax;
+    grid_config.phiMin = config.phiMin;
+    grid_config.phiBinDeflectionCoverage = config.phiBinDeflectionCoverage;
     return grid_config;
 }
 
@@ -59,7 +63,7 @@ seeding_algorithm::seeding_algorithm(vecmem::memory_resource& mr)
       m_seed_finding(default_seedfinder_config(), seedfilter_config()) {}
 
 seeding_algorithm::output_type seeding_algorithm::operator()(
-    const spacepoint_container_types::host& spacepoints) const {
+    const spacepoint_collection_types::host& spacepoints) const {
 
     return m_seed_finding(spacepoints, m_spacepoint_binning(spacepoints));
 }

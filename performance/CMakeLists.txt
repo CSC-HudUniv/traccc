@@ -1,18 +1,27 @@
 # TRACCC library, part of the ACTS project (R&D line)
 #
-# (c) 2022 CERN for the benefit of the ACTS project
+# (c) 2022-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
 # Set up the build of the traccc::performance library.
 traccc_add_library( traccc_performance performance TYPE SHARED
    # Efficiency calculation code.
-   "include/traccc/efficiency/duplication_plot_tool.hpp"
-   "include/traccc/efficiency/eff_plot_tool.hpp"
-   "include/traccc/efficiency/helpers.hpp"
+   "src/efficiency/duplication_plot_tool.hpp"
+   "src/efficiency/eff_plot_tool.hpp"
    "include/traccc/efficiency/seeding_performance_writer.hpp"
-   "include/traccc/efficiency/track_classification.hpp"
-   "include/traccc/event/event_map.hpp"
+   "src/efficiency/seeding_performance_writer.cpp"
+   "src/efficiency/track_classification.hpp"
+   # Resolution calculation code.
+   "include/traccc/resolution/fitting_performance_writer.hpp"
+   "include/traccc/resolution/res_plot_tool_config.hpp"
+   "src/resolution/fitting_performance_writer.cpp"
+   "src/resolution/res_plot_tool.hpp"
+   "src/resolution/res_plot_tool.cpp"
+   # Utils
+   "include/traccc/utils/helpers.hpp"
+   "src/utils/helpers.hpp"
+   "src/utils/helpers.cpp"
    # Value/object comparison code.
    "include/traccc/performance/details/is_same_angle.hpp"
    "src/performance/details/is_same_angle.cpp"
@@ -33,6 +42,31 @@ traccc_add_library( traccc_performance performance TYPE SHARED
    "include/traccc/performance/collection_comparator.hpp"
    "include/traccc/performance/impl/collection_comparator.ipp"
    "include/traccc/performance/container_comparator.hpp"
-   "include/traccc/performance/impl/container_comparator.ipp" )
+   "include/traccc/performance/impl/container_comparator.ipp"
+   # Performance time measurement code.
+   "include/traccc/performance/timer.hpp"
+   "src/performance/timer.cpp"
+   "include/traccc/performance/timing_info.hpp"
+   "src/performance/timing_info.cpp"
+   "include/traccc/performance/throughput.hpp"
+   "src/performance/throughput.cpp" )
 target_link_libraries( traccc_performance
-   PUBLIC ROOT::Core ROOT::RIO ROOT::Tree ROOT::Hist traccc::core )
+   PUBLIC traccc::core traccc::io covfie::core )
+
+# Use ROOT in traccc::performance, if requested.
+if( TRACCC_USE_ROOT )
+   find_package( ROOT COMPONENTS Core RIO Hist REQUIRED )
+   target_link_libraries( traccc_performance
+      PRIVATE ROOT::Core ROOT::RIO ROOT::Hist )
+   target_compile_definitions( traccc_performance
+      PRIVATE TRACCC_HAVE_ROOT )
+endif()
+
+# Use CUDA/NVTX in traccc::performance, if it's available.
+find_package( CUDAToolkit )
+if( CUDAToolkit_FOUND )
+   target_link_libraries( traccc_performance
+      PRIVATE CUDA::cudart )
+   target_compile_definitions( traccc_performance
+      PRIVATE TRACCC_HAVE_NVTX )
+endif()

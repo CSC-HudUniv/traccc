@@ -1,13 +1,16 @@
 /** TRACCC library, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 
-// Project include(s).
+// Local include(s).
+#include "../utils/utils.hpp"
 #include "traccc/cuda/seeding/track_params_estimation.hpp"
 #include "traccc/cuda/utils/definitions.hpp"
+
+// Project include(s).
 #include "traccc/seeding/device/estimate_track_params.hpp"
 
 // VecMem include(s).
@@ -19,7 +22,7 @@ namespace cuda {
 namespace kernels {
 /// CUDA kernel for running @c traccc::device::estimate_track_params
 __global__ void estimate_track_params(
-    spacepoint_container_types::const_view spacepoints_view,
+    spacepoint_collection_types::const_view spacepoints_view,
     seed_collection_types::const_view seed_view,
     bound_track_parameters_collection_types::view params_view) {
 
@@ -29,38 +32,28 @@ __global__ void estimate_track_params(
 }  // namespace kernels
 
 track_params_estimation::track_params_estimation(
-    const traccc::memory_resource& mr)
-    : m_mr(mr) {
+    const traccc::memory_resource& mr, vecmem::copy& copy, stream& str)
+    : m_mr(mr), m_copy(copy), m_stream(str) {}
 
-    // Initialize m_copy ptr based on memory resources that were given
-    if (mr.host) {
-        m_copy = std::make_unique<vecmem::cuda::copy>();
-    } else {
-        m_copy = std::make_unique<vecmem::copy>();
-    }
-}
-
-bound_track_parameters_collection_types::host
-track_params_estimation::operator()(
-    const spacepoint_container_types::const_view& spacepoints_view,
+track_params_estimation::output_type track_params_estimation::operator()(
+    const spacepoint_collection_types::const_view& spacepoints_view,
     const seed_collection_types::const_view& seeds_view) const {
 
+    // Get a convenience variable for the stream that we'll be using.
+    cudaStream_t stream = details::get_stream(m_stream);
+
     // Get the size of the seeds view
-    const std::size_t seeds_size = m_copy->get_size(seeds_view);
-
-    // Create output host container
-    bound_track_parameters_collection_types::host params(
-        seeds_size, (m_mr.host ? m_mr.host : &(m_mr.main)));
-
-    // Check if anything needs to be done.
-    if (seeds_size == 0) {
-        return params;
-    }
+    const std::size_t seeds_size = m_copy.get_size(seeds_view);
 
     // Create device buffer for the parameters
     bound_track_parameters_collection_types::buffer params_buffer(seeds_size,
                                                                   m_mr.main);
-    m_copy->setup(params_buffer);
+    m_copy.setup(params_buffer);
+
+    // Check if anything needs to be done.
+    if (seeds_size == 0) {
+        return params_buffer;
+    }
 
     // -- Num threads
     // The dimension of block is the integer multiple of WARP_SIZE (=32)
@@ -72,17 +65,14 @@ track_params_estimation::operator()(
     unsigned int num_blocks = (seeds_size + num_threads - 1) / num_threads;
 
     // run the kernel
-    kernels::estimate_track_params<<<num_blocks, num_threads>>>(
+    kernels::estimate_track_params<<<num_blocks, num_threads, 0, stream>>>(
         spacepoints_view, seeds_view, params_buffer);
 
     // cuda error check
     CUDA_ERROR_CHECK(cudaGetLastError());
-    CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    m_stream.synchronize();
 
-    // Copy the results back to the host
-    (*m_copy)(params_buffer, params);
-
-    return params;
+    return params_buffer;
 }
 
 }  // namespace cuda
