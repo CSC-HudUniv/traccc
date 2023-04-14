@@ -40,7 +40,7 @@ clusterisation_cca_algorithm::clusterisation_cca_algorithm(
 }
 
 clusterisation_cca_algorithm::output_type clusterisation_cca_algorithm::operator()(
-    const cell_container_types::host& cells_per_event) const {
+    const cell_collection_types::host& cells_per_event) const {
 
     // Vecmem copy object for moving the data between host and device
     vecmem::copy copy;
@@ -53,7 +53,7 @@ clusterisation_cca_algorithm::output_type clusterisation_cca_algorithm::operator
     
     traccc::cuda::component_connection cc;
 
-    traccc::measurement_container_types::host measurements = cc(cells_per_event);
+    traccc::measurement_container_types::host measurements;// = cc(cells_per_event);
     
     const auto& measurement_data = get_data(measurements, m_mr.host ? m_mr.host : &(m_mr.main));
 
@@ -82,12 +82,13 @@ clusterisation_cca_algorithm::output_type clusterisation_cca_algorithm::operator
 
     std::size_t blocksPerGrid = meas_prefix_sum_buff.size()/threadsPerBlock + 1;
     
-    spacepoint_container_types::buffer spacepoints_buffer{
+    spacepoint_container_types::buffer spacepoints_buffer;
+    /*spacepoint_container_types::buffer spacepoints_buffer{
         {num_modules, m_mr.main},
         {std::vector<std::size_t>(num_modules, 0), clusters_per_module_host,
         m_mr.main, m_mr.host}};
     m_copy->setup(spacepoints_buffer.headers);
-    m_copy->setup(spacepoints_buffer.items);
+    m_copy->setup(spacepoints_buffer.items);*/
 
     // Invoke spacepoint formation will call form_spacepoints kernel
     traccc::cuda::kernels::form_spacepoints<<<blocksPerGrid, threadsPerBlock>>>(

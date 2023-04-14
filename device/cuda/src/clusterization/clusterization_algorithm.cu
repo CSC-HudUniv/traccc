@@ -8,14 +8,14 @@
 // CUDA Library include(s).
 #include "../utils/utils.hpp"
 #include "traccc/cuda/clusterization/clusterization_algorithm.hpp"
-#include "traccc/cuda/clusterization/clusterisation_kernels.cuh"
+//#include "traccc/cuda/clusterization/clusterisation_kernels.cuh"
 
 // Project include(s)
-#include "traccc/cuda/cca/component_connection.hpp"
-#include "traccc/clusterization/device/connect_components.hpp"
-#include "traccc/clusterization/device/count_cluster_cells.hpp"
-#include "traccc/clusterization/device/create_measurements.hpp"
-#include "traccc/clusterization/device/find_clusters.hpp"
+//#include "traccc/cuda/cca/component_connection.hpp"
+//#include "traccc/clusterization/device/connect_components.hpp"
+//#include "traccc/clusterization/device/count_cluster_cells.hpp"
+//#include "traccc/clusterization/device/create_measurements.hpp"
+//#include "traccc/clusterization/device/find_clusters.hpp"
 #include "traccc/cuda/utils/definitions.hpp"
 
 // Project include(s)

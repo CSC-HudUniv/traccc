@@ -25,7 +25,7 @@ namespace traccc::cuda {
 namespace kernels {
 
 __global__ void find_clusters(
-    const cell_container_types::const_view cells_view,
+    const cell_collection_types::const_view cells_view,
     vecmem::data::jagged_vector_view<unsigned int> sparse_ccl_indices_view,
     vecmem::data::vector_view<std::size_t> clusters_per_module_view);
 
@@ -37,7 +37,7 @@ __global__ void count_cluster_cells(
     vecmem::data::vector_view<unsigned int> cluster_sizes_view);
 
 __global__ void connect_components(
-    const cell_container_types::const_view cells_view,
+    const cell_collection_types::const_view cells_view,
     vecmem::data::jagged_vector_view<unsigned int> sparse_ccl_indices_view,
     vecmem::data::vector_view<std::size_t> cluster_prefix_sum_view,
     vecmem::data::vector_view<const device::prefix_sum_element_t>
@@ -45,7 +45,7 @@ __global__ void connect_components(
     cluster_container_types::view clusters_view);
 
 __global__ void create_measurements(
-    const cell_container_types::const_view cells_view,
+    const cell_collection_types::const_view cells_view,
     cluster_container_types::const_view clusters_view,
     measurement_container_types::view measurements_view);
 

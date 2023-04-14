@@ -40,11 +40,11 @@ traccc_add_library( traccc_cuda cuda TYPE SHARED
   "src/cca/component_connection.cu"
   # Clusterization
   "include/traccc/cuda/clusterization/clusterization_algorithm.hpp"
-  "include/traccc/cuda/clusterization/clusterisation_cca_algorithm.hpp"
-  "include/traccc/cuda/clusterization/clusterisation_kernels.cuh"
+  #"include/traccc/cuda/clusterization/clusterisation_cca_algorithm.hpp"
+  #"include/traccc/cuda/clusterization/clusterisation_kernels.cuh"
   "src/clusterization/clusterization_algorithm.cu"
-  "src/clusterization/clusterisation_cca_algorithm.cu"
-  "src/clusterization/clusterisation_kernels.cu"
+  #"src/clusterization/clusterisation_cca_algorithm.cu"
+  #"src/clusterization/clusterisation_kernels.cu"
   # Fitting
   "include/traccc/cuda/fitting/fitting_algorithm.hpp"
   "src/fitting/fitting_algorithm.cu"

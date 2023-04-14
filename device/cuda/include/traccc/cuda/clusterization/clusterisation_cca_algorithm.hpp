@@ -26,7 +26,7 @@ namespace traccc::cuda {
 
 class clusterisation_cca_algorithm
     : public algorithm<spacepoint_container_types::buffer(
-          const cell_container_types::host&)> {
+          const cell_collection_types::host&)> {
 
     public:
     /// Constructor for clusterization algorithm
@@ -41,7 +41,7 @@ class clusterisation_cca_algorithm
     /// @return a spacepoint container (buffer) - jagged vector of spacepoints
     /// per module.
     output_type operator()(
-        const cell_container_types::host& cells_per_event) const override;
+        const cell_collection_types::host& cells_per_event) const override;
 
     private:
     traccc::memory_resource m_mr;
