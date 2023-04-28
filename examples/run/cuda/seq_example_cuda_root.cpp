@@ -132,7 +132,7 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
 
             // uint atlasid = data->m_Hits_m_identifierHash[ihit];
             // int ifpixel  = data->m_Hits_m_detType[ihit];
-            // //unsigned long int geometry_id = idr->Give50muPixelDetectorID(atlasid,ifpixel);
+            // //unsigned long int geometry_id = idr->Give50muPixelDetectorID(data->m_Hits_m_identifierHash[ihit],ata->m_Hits_m_detType[ihit]);
             unsigned long int geometry_id = 576461302059245312;
             // int hit_id = ihit;
             // int channel0 = data->m_Hits_m_phiIndex[ihit];
@@ -167,19 +167,20 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
                     Clusterization (cpu)
                 -----------------------------*/
 
-                
+                {
                     traccc::performance::timer t("Clusterization  (cpu)",  elapsedTimes);
                     measurements_per_event = ca(cells_events_host, module_events_host);
                 // stop measuring clusterization cpu timer
-
+                }
                 /*---------------------------------
                     Spacepoint formation (cpu)
                 ---------------------------------*/
 
-                
+                {
                     traccc::performance::timer t("Spacepoint formation  (cpu)", elapsedTimes);
                     spacepoints_per_event = sf(measurements_per_event, module_events_host);
                 // stop measuring spacepoint formation cpu timer
+                }
             }
 
             //seeds_cuda_buffer = sa_cuda(spacepoints_cuda_buffer);
