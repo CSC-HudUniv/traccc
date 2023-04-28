@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-namespace {
+namespace traccc::io::csv{
 
 /// Comparator used for sorting cells. This sorting is one of the assumptions
 /// made in the clusterization algorithm

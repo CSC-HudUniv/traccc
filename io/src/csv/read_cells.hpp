@@ -12,6 +12,7 @@
 #include "traccc/geometry/digitization_config.hpp"
 #include "traccc/geometry/geometry.hpp"
 #include "traccc/io/reader_edm.hpp"
+#include "cell.hpp"
 
 // VecMem include(s).
 #include <vecmem/memory/memory_resource.hpp>
@@ -34,4 +35,7 @@ cell_reader_output read_cells(std::string_view filename,
                               const digitization_config* dconfig = nullptr,
                               vecmem::memory_resource* mr = nullptr);
 
+cell_module get_module(traccc::io::csv::cell c,
+                               const traccc::geometry* geom,
+                               const traccc::digitization_config* dconfig);
 }  // namespace traccc::io::csv

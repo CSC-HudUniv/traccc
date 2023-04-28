@@ -235,11 +235,11 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-  virtual void     WriteCellFiles(Int_t nevents,string dirnm);
-  virtual void     WritePixelCellFiles(Int_t nevents,string dirnm);
-  void WriteClusters(Int_t nevents, string dirnm);
-  void WritePixelClusters(Int_t nevents,string dirnm);
-  void DrawVariables();
+   //virtual void     WriteCellFiles(Int_t nevents,string dirnm);
+   //virtual void     WritePixelCellFiles(Int_t nevents,string dirnm);
+   //void WriteClusters(Int_t nevents, string dirnm);
+   //void WritePixelClusters(Int_t nevents,string dirnm);
+   //void DrawVariables();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 
@@ -248,7 +248,6 @@ public :
 
 #endif
 
-#ifdef DataList_cxx
 DataList::DataList(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
@@ -428,4 +427,3 @@ Int_t DataList::Cut(Long64_t entry)
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef DataList_cxx
