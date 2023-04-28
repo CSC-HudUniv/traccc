@@ -47,8 +47,7 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
     auto surface_transforms = traccc::io::read_geometry(i_cfg.detector_file);
 
     // Read the digitization configuration file
-    auto digi_cfg =
-        traccc::io::read_digitization_config(i_cfg.digitization_config_file);
+    auto digi_cfg = traccc::io::read_digitization_config(i_cfg.digitization_config_file);
 
     // Output stats
     uint64_t n_cells = 0;
@@ -103,8 +102,7 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
         traccc::track_params_estimation::output_type params;
 
         // Instantiate cuda containers/collections
-        traccc::spacepoint_collection_types::buffer spacepoints_cuda_buffer(
-            0, *mr.host);
+        traccc::spacepoint_collection_types::buffer spacepoints_cuda_buffer(0, *mr.host);
         traccc::seed_collection_types::buffer seeds_cuda_buffer(0, *mr.host);
         traccc::bound_track_parameters_collection_types::buffer
             params_cuda_buffer(0, *mr.host);

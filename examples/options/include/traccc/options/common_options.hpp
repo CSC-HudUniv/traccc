@@ -13,17 +13,28 @@
 
 namespace traccc {
 
-namespace po = boost::program_options;
+    namespace po = boost::program_options;
 
-struct common_options {
-    traccc::data_format input_data_format = traccc::data_format::csv;
-    std::string input_directory;
-    unsigned int events;
-    int skip;
-    unsigned short target_cells_per_partition;
+    struct common_options {
+        traccc::data_format input_data_format = traccc::data_format::csv;
+        std::string input_directory;
+        unsigned int events;
+        int skip;
+        unsigned short target_cells_per_partition;
 
-    common_options(po::options_description& desc);
-    void read(const po::variables_map& vm);
-};
+        common_options(po::options_description& desc);
+        void read(const po::variables_map& vm);
+    };
+
+    struct HTTSim_options {
+        traccc::data_format input_data_format = traccc::data_format::csv;
+        std::string input_directory;
+        unsigned int events;
+        int skip;
+        unsigned short target_cells_per_partition;
+
+        HTTSim_options(po::options_description& desc);
+        void read(const po::variables_map& vm);
+    };
 
 }  // namespace traccc

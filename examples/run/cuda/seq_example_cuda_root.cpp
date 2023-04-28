@@ -45,10 +45,10 @@
 namespace po = boost::program_options;
 
 int seq_run(const traccc::full_tracking_input_config& i_cfg,
-            const traccc::common_options& common_opts, bool run_cpu) {
+            const traccc::HTTSim_options& common_opts, bool run_cpu) {
 
     //testing
-    int nevents = 100;
+    int nevents = common_opts.events;
 
     // Read the surface transforms
     auto surface_transforms = traccc::io::read_geometry(i_cfg.detector_file);
@@ -82,8 +82,7 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
 
     vecmem::cuda::async_copy copy{stream.cudaStream()};
 
-    traccc::cuda::clusterization_algorithm ca_cuda(
-        mr, copy, stream, common_opts.target_cells_per_partition);
+    traccc::cuda::clusterization_algorithm ca_cuda( mr, copy, stream, common_opts.target_cells_per_partition);
     traccc::cuda::seeding_algorithm sa_cuda(mr, copy, stream);
     traccc::cuda::track_params_estimation tp_cuda(mr, copy, stream);
 
@@ -99,7 +98,7 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
 
     // Read from root file
     TChain *myC = new TChain("HTTEventTree");
-    myC->Add(("/home/yusuf/atlas-project/traccc-projects/traccc/data/singlemu_invPtFlat1_10k_wrap.root"));
+    myC->Add((common_opts.input_directory.c_str()));
     DataList *data = new DataList(myC);
     
     //Gen number of entries and number of events from root file
@@ -108,7 +107,10 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
 
 
     for (Long64_t jentry=0; jentry<nfiles;jentry++) {
-
+        
+        
+        traccc::clusterization_algorithm::output_type measurements_per_event;
+        traccc::spacepoint_formation::output_type spacepoints_per_event;
         traccc::spacepoint_collection_types::buffer spacepoints_cuda_buffer(0, *mr.host);
         traccc::seed_collection_types::buffer seeds_cuda_buffer(0, *mr.host);
 
@@ -159,9 +161,36 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
 
             spacepoints_cuda_buffer = ca_cuda(cells_events_buffer, module_events_buffer).first;
 
+            if (run_cpu) {
+
+                /*-----------------------------
+                    Clusterization (cpu)
+                -----------------------------*/
+
+                
+                    traccc::performance::timer t("Clusterization  (cpu)",  elapsedTimes);
+                    measurements_per_event = ca(cells_events_host, module_events_host);
+                // stop measuring clusterization cpu timer
+
+                /*---------------------------------
+                    Spacepoint formation (cpu)
+                ---------------------------------*/
+
+                
+                    traccc::performance::timer t("Spacepoint formation  (cpu)", elapsedTimes);
+                    spacepoints_per_event = sf(measurements_per_event, module_events_host);
+                // stop measuring spacepoint formation cpu timer
+            }
+
             //seeds_cuda_buffer = sa_cuda(spacepoints_cuda_buffer);
 
-            //std::cout << vecmem::get_data(cells_events_buffer);       
+            //std::cout << vecmem::get_data(cells_events_buffer);
+
+
+            // Statistics
+            n_cells += cells_events_host.size();
+            n_spacepoints += spacepoints_per_event.size();
+            n_spacepoints_cuda += spacepoints_cuda_buffer.size();
 
     }
 
@@ -358,20 +387,20 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
     //     sd_performance_writer.finalize();
     // }
 
-    // std::cout << "==> Statistics ... " << std::endl;
-    // std::cout << "- read    " << n_spacepoints << " spacepoints from "
-    //           << n_modules << " modules" << std::endl;
-    // std::cout << "- created        " << n_cells << " cells" << std::endl;
-    // std::cout << "- created        " << n_measurements << " measurements     "
-    //           << std::endl;
-    // std::cout << "- created        " << n_spacepoints << " spacepoints     "
-    //           << std::endl;
-    // std::cout << "- created (cuda) " << n_spacepoints_cuda
-    //           << " spacepoints     " << std::endl;
+    std::cout << "==> Statistics ... " << std::endl;
+    std::cout << "- read    " << n_spacepoints << " spacepoints from "
+              << n_modules << " modules" << std::endl;
+    std::cout << "- created        " << n_cells << " cells" << std::endl;
+    std::cout << "- created        " << n_measurements << " measurements     "
+              << std::endl;
+    std::cout << "- created        " << n_spacepoints << " spacepoints     "
+              << std::endl;
+    std::cout << "- created (cuda) " << n_spacepoints_cuda
+              << " spacepoints     " << std::endl;
 
-    // std::cout << "- created  (cpu) " << n_seeds << " seeds" << std::endl;
-    // std::cout << "- created (cuda) " << n_seeds_cuda << " seeds" << std::endl;
-    // std::cout << "==>Elapsed times...\n" << elapsedTimes << std::endl;
+    std::cout << "- created  (cpu) " << n_seeds << " seeds" << std::endl;
+    std::cout << "- created (cuda) " << n_seeds_cuda << " seeds" << std::endl;
+    std::cout << "==>Elapsed times...\n" << elapsedTimes << std::endl;
 
 
     return 0;
@@ -385,7 +414,7 @@ int main(int argc, char* argv[]) {
 
     // Add options
     desc.add_options()("help,h", "Give some help with the program's options");
-    traccc::common_options common_opts(desc);
+    traccc::HTTSim_options common_opts(desc);
     traccc::full_tracking_input_config full_tracking_input_cfg(desc);
     desc.add_options()("run_cpu", po::value<bool>()->default_value(false),
                        "run cpu tracking as well");

@@ -16,12 +16,12 @@ traccc_add_executable( seq_example_cuda "seq_example_cuda.cpp"
                   traccc::core traccc::device_common traccc::cuda
                   traccc::options )
 
-traccc_add_executable( seq_example_cuda_root "seq_example_cuda_root.cpp" "DataList.cxx"
+traccc_add_executable( seq_example_cuda_HTTSim "seq_example_cuda_root.cpp" "DataList.cxx"
    LINK_LIBRARIES vecmem::core vecmem::cuda traccc::io traccc::performance
                   traccc::core traccc::device_common traccc::cuda
                   traccc::options ${ROOT_LIBRARIES} )
                
-target_include_directories( traccc_seq_example_cuda_root PUBLIC ${ROOT_INCLUDE_DIRS})
+target_include_directories( traccc_seq_example_cuda_HTTSim PUBLIC ${ROOT_INCLUDE_DIRS})
 
 message("ROOTLIBRARY ==> ${ROOT_LIBRARIES}")
 

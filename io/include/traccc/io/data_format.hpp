@@ -17,7 +17,6 @@ enum data_format : int {
     csv = 0,
     binary = 1,
     json = 2,
-    root = 3,
 };
 
 /// Printout helper for @c traccc::data_format
