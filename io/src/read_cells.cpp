@@ -36,7 +36,10 @@ cell_reader_output read_cells(std::size_t event, std::string_view directory,
                     get_event_filename(event, "-modules.dat"),
                 mr);
             return {std::move(cells), std::move(modules)};
-        }
+        };
+        case data_format::root: {
+
+        };
         default:
             throw std::invalid_argument("Unsupported data format");
     }

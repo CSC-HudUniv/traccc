@@ -5,6 +5,8 @@
  * Mozilla Public License Version 2.0
  */
 
+#include <iostream>
+
 // options
 #include "traccc/options/common_options.hpp"
 
@@ -12,6 +14,7 @@ traccc::common_options::common_options(po::options_description& desc) {
 
     desc.add_options()("input-csv", "Use csv input file");
     desc.add_options()("input-binary", "Use binary input file");
+    desc.add_options()("input-root", "Use root input file");
     desc.add_options()("input_directory", po::value<std::string>()->required(),
                        "specify the directory of input data");
     desc.add_options()("events", po::value<unsigned int>()->required(),
@@ -31,6 +34,8 @@ void traccc::common_options::read(const po::variables_map& vm) {
         input_data_format = traccc::data_format::csv;
     } else if (vm.count("input-binary")) {
         input_data_format = traccc::data_format::binary;
+    }else if (vm.count("input-root")) {
+        input_data_format = traccc::data_format::root;
     }
     input_directory = vm["input_directory"].as<std::string>();
     events = vm["events"].as<unsigned int>();

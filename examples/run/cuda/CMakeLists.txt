@@ -9,11 +9,22 @@ include( traccc-compiler-options-cuda )
 
 # External(s).
 find_package( CUDAToolkit REQUIRED )
+find_package( ROOT REQUIRED)
 
 traccc_add_executable( seq_example_cuda "seq_example_cuda.cpp"
    LINK_LIBRARIES vecmem::core vecmem::cuda traccc::io traccc::performance
                   traccc::core traccc::device_common traccc::cuda
                   traccc::options )
+
+traccc_add_executable( seq_example_cuda_root "seq_example_cuda_root.cpp" "DataList.cxx"
+   LINK_LIBRARIES vecmem::core vecmem::cuda traccc::io traccc::performance
+                  traccc::core traccc::device_common traccc::cuda
+                  traccc::options ${ROOT_LIBRARIES} )
+               
+target_include_directories( traccc_seq_example_cuda_root PUBLIC ${ROOT_INCLUDE_DIRS})
+
+message("ROOTLIBRARY ==> ${ROOT_LIBRARIES}")
+
 traccc_add_executable( seeding_example_cuda "seeding_example_cuda.cpp"
    LINK_LIBRARIES vecmem::core vecmem::cuda traccc::io traccc::performance
                   traccc::core traccc::device_common traccc::cuda

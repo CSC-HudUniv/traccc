@@ -52,7 +52,7 @@ struct cell {
     scalar time = 0.;
 
     using link_type = cell_module_collection_types::view::size_type;
-    link_type module_link;
+    link_type module_link; //GeomId I think
 };
 
 /// Declare all cell collection types
