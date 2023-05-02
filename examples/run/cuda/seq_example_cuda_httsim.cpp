@@ -227,25 +227,6 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
         traccc::cell_collection_types::host cells_events_host = alt_read_out_per_event.cells;
         traccc::cell_module_collection_types::host module_events_host = alt_read_out_per_event.modules;
 
-        /*for(int ihit=0; ihit<data->m_Hits_ ; ihit++){
-            if(data->m_Hits_m_hitType[ihit]!=0) continue;
-            if(data->m_Hits_m_detType[ihit]!=1) continue;
-
-            uint atlasid = data->m_Hits_m_identifierHash[ihit];
-            unsigned long int geometry_id = idr->Give50muPixelDetectorID(atlasid,1);
-            int channel0 = data->m_Hits_m_phiIndex[ihit];
-            int channel1 = data->m_Hits_m_etaIndex[ihit];
-            double timestamp = 0;
-            double value = data->m_Hits_m_ToT[ihit];
-
-            traccc::cell current_cell {channel0, channel1, value, timestamp, geometry_id};
-            traccc::io::csv::cell csv_cell {geometry_id, ihit, channel0, channel1, timestamp, value};
-            traccc::cell_module current_module = traccc::io::csv::get_module(csv_cell, &surface_transforms, &digi_cfg);
-
-            cells_events_host.push_back(current_cell);
-            module_events_host.push_back(current_module);
-        }*/
-
         //Allocate GPU memory and copy the cell and module data from the host type to buffer type
         traccc::cell_collection_types::buffer cells_events_buffer (cells_events_host.size(), mr.main);
         //std::cout<<"Event "<< jentry <<" has "<<cells_events_host.size()<<" cells."<<std::endl;
@@ -276,7 +257,10 @@ int seq_run(const traccc::full_tracking_input_config& i_cfg,
             // stop measuring spacepoint formation cpu timer
             }
         }
+        
         // Statistics
+        n_modules += module_events_host.size();
+        n_measurements += measurements_per_event.size();
         n_cells += cells_events_host.size();
         n_spacepoints += spacepoints_per_event.size();
         n_spacepoints_cuda += spacepoints_cuda_buffer.size();
