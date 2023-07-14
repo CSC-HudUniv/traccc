@@ -1,6 +1,6 @@
 /** TRACCC library, part of the ACTS project (R&D line)
  *
- * (c) 2022 CERN for the benefit of the ACTS project
+ * (c) 2022-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -11,6 +11,7 @@
 #include "traccc/definitions/qualifiers.hpp"
 #include "traccc/edm/track_candidate.hpp"
 #include "traccc/edm/track_state.hpp"
+#include "traccc/fitting/fitting_config.hpp"
 #include "traccc/fitting/kalman_filter/kalman_fitter.hpp"
 #include "traccc/utils/algorithm.hpp"
 
@@ -25,6 +26,13 @@ class fitting_algorithm
 
     public:
     using transform3_type = typename fitter_t::transform3_type;
+    /// Configuration type
+    using config_type = typename fitter_t::config_type;
+
+    /// Constructor for the fitting algorithm
+    ///
+    /// @param cfg  Configuration object
+    fitting_algorithm(const config_type& cfg) : m_cfg(cfg) {}
 
     /// Run the algorithm
     ///
@@ -35,7 +43,7 @@ class fitting_algorithm
         const typename track_candidate_container_types::host& track_candidates)
         const override {
 
-        fitter_t fitter(det);
+        fitter_t fitter(det, m_cfg);
 
         track_state_container_types::host output_states;
 
@@ -51,6 +59,7 @@ class fitting_algorithm
             // Make a vector of track state
             auto& cands = track_candidates[i].items;
             vecmem::vector<track_state<transform3_type>> input_states;
+            input_states.reserve(cands.size());
             for (auto& cand : cands) {
                 input_states.emplace_back(cand);
             }
@@ -68,6 +77,9 @@ class fitting_algorithm
 
         return output_states;
     }
+
+    /// Config object
+    config_type m_cfg;
 };
 
 }  // namespace traccc

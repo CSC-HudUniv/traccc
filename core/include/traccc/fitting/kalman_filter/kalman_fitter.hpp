@@ -1,6 +1,6 @@
 /** TRACCC library, part of the ACTS project (R&D line)
  *
- * (c) 2022 CERN for the benefit of the ACTS project
+ * (c) 2022-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,7 +12,10 @@
 #include "traccc/edm/track_candidate.hpp"
 #include "traccc/edm/track_parameters.hpp"
 #include "traccc/edm/track_state.hpp"
+#include "traccc/fitting/fitting_config.hpp"
+#include "traccc/fitting/kalman_filter/gain_matrix_smoother.hpp"
 #include "traccc/fitting/kalman_filter/kalman_actor.hpp"
+#include "traccc/fitting/kalman_filter/statistics_updater.hpp"
 
 // detray include(s).
 #include "detray/propagator/actor_chain.hpp"
@@ -21,6 +24,9 @@
 #include "detray/propagator/actors/parameter_transporter.hpp"
 #include "detray/propagator/actors/pointwise_material_interactor.hpp"
 #include "detray/propagator/propagator.hpp"
+
+// System include(s).
+#include <limits>
 
 namespace traccc {
 
@@ -39,13 +45,8 @@ class kalman_fitter {
     // navigator candidate type
     using intersection_type = typename navigator_t::intersection_type;
 
-    // Kalman fitter configuration
-    struct config {
-        std::size_t n_iterations = 1;
-        scalar_type pathlimit = std::numeric_limits<scalar>::max();
-        scalar_type overstep_tolerance = -10 * detray::unit<scalar>::um;
-        scalar_type step_constraint = 5. * detray::unit<scalar>::mm;
-    };
+    /// Configuration type
+    using config_type = fitting_config<scalar_type>;
 
     // transform3 type
     using transform3_type = typename stepper_t::transform3_type;
@@ -72,7 +73,8 @@ class kalman_fitter {
     ///
     /// @param det the detector object
     TRACCC_HOST_DEVICE
-    kalman_fitter(const detector_type& det) : m_detector(det) {}
+    kalman_fitter(const detector_type& det, const config_type& cfg)
+        : m_detector(det), m_cfg(cfg) {}
 
     /// Kalman fitter state
     struct state {
@@ -164,6 +166,10 @@ class kalman_fitter {
             seed_params, m_detector.get_bfield(), m_detector,
             std::move(nav_candidates));
 
+        // @TODO: Should be removed once detray is fixed to set the
+        // volume in the constructor
+        propagation._navigation.set_volume(seed_params.surface_link().volume());
+
         // Set overstep tolerance and stepper constraint
         propagation._stepping().set_overstep_tolerance(
             m_cfg.overstep_tolerance);
@@ -177,7 +183,8 @@ class kalman_fitter {
         // Run smoothing
         smooth(fitter_state);
 
-        //@todo: Write track info
+        // Update track fitting qualities
+        update_statistics(fitter_state);
     }
 
     /// Run smoothing after kalman filtering
@@ -217,11 +224,34 @@ class kalman_fitter {
         }
     }
 
+    TRACCC_HOST_DEVICE
+    void update_statistics(state& fitter_state) {
+        auto& fit_info = fitter_state.m_fit_info;
+        auto& track_states = fitter_state.m_fit_actor_state.m_track_states;
+        const auto& mask_store = m_detector.mask_store();
+
+        // Fit parameter = smoothed track parameter at the first surface
+        fit_info.fit_params = track_states[0].smoothed();
+
+        for (const auto& trk_state : track_states) {
+
+            // Surface
+            const auto& surface = m_detector.surfaces(trk_state.surface_link());
+
+            // Update NDoF and Chi2
+            mask_store.template visit<statistics_updater<transform3_type>>(
+                surface.mask(), fit_info, trk_state);
+        }
+
+        // Subtract the NDoF with the degree of freedom of the bound track (=5)
+        fit_info.ndf = fit_info.ndf - 5.f;
+    }
+
     private:
     // Detector object
     const detector_type& m_detector;
     // Configuration object
-    config m_cfg;
+    config_type m_cfg;
 };
 
 }  // namespace traccc
