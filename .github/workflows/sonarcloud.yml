@@ -50,8 +50,10 @@ jobs:
         - name: Collect coverage into one XML report
           continue-on-error: true
           run: |
+            conda init bash
             conda activate sonarcloud
             gcovr --sonarqube > coverage.xml
+          shell: bash -l {0}
             
         - name: Run sonar-scanner
           env:
