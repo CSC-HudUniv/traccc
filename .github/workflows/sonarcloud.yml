@@ -43,11 +43,14 @@ jobs:
   
         - name: Run tests to generate coverage statistics
           env:
-            TRACCC_TEST_DATA_DIR: /home/ymanjra/traccc-projects/traccc/data/
+            TRACCC_TEST_DATA_DIR: /home/ymanjra/CSC-HudUniv/traccc-main/data
           run: |
             find ../traccc-build/bin -maxdepth 1 -name "traccc_test*" -executable -exec '{}' ';'
+
         - name: Collect coverage into one XML report
+          continue-on-error: true
           run: |
+            conda activate sonarcloud
             gcovr --sonarqube > coverage.xml
             
         - name: Run sonar-scanner
